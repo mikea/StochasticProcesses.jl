@@ -7,9 +7,12 @@ export BrownianMotion,
        ItoIntegral,
        ItoProcess,
        SDE,
-       CompositeProcess
+       CompositeProcess,
+       AItoProcess
 
 using Distributions
+
+import Base.convert
 
 # Internal stochastic process implementation
 
