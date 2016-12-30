@@ -1,13 +1,33 @@
 # StochasticProcesses.jl
 
-A Julia package for (continuous) stochastic processes.
+A Julia package for (continuous) stochastic processes. Monte-Carlo simulation and basic facts.
 
-## Examples
+## Overview
 
 ```julia
 
 julia> using StochasticProcesses;
 
+```
+
+### Basic Processes
+
+`BrownianMotion(y0=0)`, `BrownianMotionWithDrift(mu, sigma, y0)`, `GeometricBrownianMotion(mu, sigma, y0)`.
+
+
+### Ito Processes
+
+`ItoIntegral(f)` - solution of `dy = f(y) * dB` with `y(0) = 0`.
+
+`SDE(f, g, y0)` - solution of `dy = f(t, y) * dt + g(t, y) * dB`.
+
+`CompositeProcess(process, f)` - `f(t, y)` applied to the `process`.
+
+### Simulating Paths
+
+`cumsim(process, t, k==1)` returns `k` paths of `process` simulation on the time grid `t`.
+
+```julia
 julia> cumsim(BrownianMotion(), linspace(0, 1, 5))
 5×1 Array{Float64,2}:
   0.0      
@@ -22,8 +42,15 @@ julia> cumsim(BrownianMotion(), linspace(0, 1, 5), 3)
  -0.815025  -0.331914  -0.146447 
  -0.643032   0.230647  -0.528345 
  -1.04061   -0.713817  -0.0711855
- -0.226368  -0.417196  -0.203268 
+ -0.226368  -0.417196  -0.203268
+```
 
+### Simulated Sampling
+
+`sim(process, t, k)` returns `k` end results of `process` simulation on the time grid `t.`
+Faster and more memory efficient that `cumsim.`
+
+```julia
 julia> sim(BrownianMotionWithDrift(10, 10, 100), linspace(0, 1, 1000), 3)
 3-element Array{Float64,1}:
   97.8373
