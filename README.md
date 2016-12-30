@@ -29,12 +29,19 @@ julia> sim(BrownianMotionWithDrift(10, 10, 100), linspace(0, 1, 1000), 3)
   97.8373
  107.271 
  105.589 
+ ```
+ 
+ ### distribution
+ 
+`distribution(process, t)` returns probability distribution of `process` value at time `t`.
+Only available for: `BrownianMotion`, `BrownianMotionWithDrift`, `GeometricBrownianMotion`.
 
+ ```julia
 julia> distribution(GeometricBrownianMotion(.1, .3, 100), 10)
 Distributions.LogNormal{Float64}(μ=5.155170185988092, σ=0.9486832980505138)
 ```
 
-`rand(process, t, k==1)` - returns `k` samples of `process` at the end of the time grid `t`.
+`rand(process, t, k==1)` returns `k` samples of `process` at the end of the time grid `t`.
 Uses precise analytical distribution if available, or `sim`.
 
 ```julia
