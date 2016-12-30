@@ -4,4 +4,4 @@ machine:
     
 test:
   post:
-    - docker build -t StochasticProcesses .
+    - docker build .
