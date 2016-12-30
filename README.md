@@ -4,7 +4,7 @@ A Julia package for (continuous) stochastic processes. Monte-Carlo simulation an
 
 Demo notebooks: 
 * [examples/sde.ipynb](examples/sde.ipynb) - demostration of basic stochastic differential equations properties.
-* [examples/useful_processes.ipynb](examples/useful_process.ipynb) - demonstration of basic processes and their properties.
+* [examples/useful_processes.ipynb](examples/useful_processes.ipynb) - demonstration of basic processes and their properties.
 * [examples/black-scholes.ipynb](examples/black-scholes.ipynb) - Black Scholes formula demonstration.
 
 ## Overview
