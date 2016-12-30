@@ -1,7 +1,6 @@
 using Base.Test
 using StochasticProcesses
 
-
 t=linspace(0, 1, 10)
 
 let process = BrownianMotion()

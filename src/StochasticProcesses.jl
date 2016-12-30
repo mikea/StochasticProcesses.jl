@@ -1,5 +1,14 @@
 module StochasticProcesses
 
+export cumsim, distribution, sim
+export BrownianMotion,
+       BrownianMotionWithDrift,
+       GeometricBrownianMotion,
+       ItoIntegral,
+       ItoProcess,
+       SDE,
+       CompositeProcess
+
 using Distributions
 
 # Internal stochastic process implementation
@@ -71,8 +80,8 @@ function sim{P <: AProcess}(process::P, t, k::Int=1)
   next(process, gen, gen.n)
 end
 
-function rand{P <: AProcess}(process::P, t, k::Int=1)
-  # todo: maybe a different method should do this
+function Base.rand{P <: AProcess}(process::P, t, k::Int=1)
+  # todo: better way to code this?
   if method_exists(distribution, (typeof(process), Float64))
     return Base.rand(distribution(process, t[end]), k)
   end
