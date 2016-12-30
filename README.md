@@ -1,5 +1,7 @@
 # StochasticProcesses.jl
 
+[![CircleCI](https://circleci.com/gh/mikea/StochasticProcesses.jl.svg?style=svg&circle-token=fd2d1bde451f113b6bc3de869144990546fd3c96)](https://circleci.com/gh/mikea/StochasticProcesses.jl)
+
 A Julia package for (continuous) stochastic processes. Monte-Carlo simulation and basic facts.
 
 Demo notebooks: 
