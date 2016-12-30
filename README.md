@@ -5,6 +5,9 @@ A Julia package for (continuous) stochastic processes.
 ## Examples
 
 ```julia
+
+julia> using StochasticProcesses;
+
 julia> cumsim(BrownianMotion(), linspace(0, 1, 5))
 5×1 Array{Float64,2}:
   0.0      
