@@ -1,1 +1,3 @@
-# (Continuous) Stochastic Processes in Julia
+# StochasticProcesses.jl
+
+A Julia package for (continuous) stochastic processes.
