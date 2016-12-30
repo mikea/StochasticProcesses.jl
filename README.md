@@ -1,2 +1,1 @@
-# julia-sde
-Stochastic Differential Equantions in Julia
+# (Continuous) Stochastic Processes in Julia
