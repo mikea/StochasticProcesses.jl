@@ -1,0 +1,12 @@
+sim(BrownianMotion) 10000x10000:
+  0.942005 seconds (19.50 k allocations: 695.672 KB)
+  1.008803 seconds (19.50 k allocations: 695.672 KB, 5.23% gc time)
+  0.928166 seconds (19.50 k allocations: 695.672 KB)
+  0.937984 seconds (19.50 k allocations: 695.672 KB)
+  0.944019 seconds (19.50 k allocations: 695.672 KB)
+cumsim(BrownianMotion) 10000x10000:
+  2.421440 seconds (19.51 k allocations: 763.695 MB, 3.04% gc time)
+  2.272246 seconds (19.51 k allocations: 763.695 MB, 3.32% gc time)
+  2.279845 seconds (19.51 k allocations: 763.695 MB, 3.69% gc time)
+  2.228707 seconds (19.51 k allocations: 763.695 MB, 1.07% gc time)
+  2.233834 seconds (19.51 k allocations: 763.695 MB, 1.11% gc time)
