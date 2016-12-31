@@ -1,6 +1,6 @@
 module StochasticProcesses
 
-export cumsim, distribution, sim
+export initial, cumsim, distribution, sim
 export BrownianMotion,
        BrownianMotionWithDrift,
        GeometricBrownianMotion,
@@ -12,7 +12,7 @@ export BrownianMotion,
 
 using Distributions
 
-import Base.convert
+import Base.convert, Base.size, Base.rand
 
 # Internal stochastic process implementation
 
@@ -20,31 +20,28 @@ abstract AProcess
 
 type Generator
   # specified
-  t
+  t::AbstractArray{Float64, 1}
   n::Int64
+  "number of dimensions."
   k::Int64
 
   # computed
-  y::Vector{Float64}
+  d::Tuple
+  y::Array{Float64}
   dt::Vector{Float64}
   sdt::Vector{Float64}
-  b::Vector{Float64}
-  db::Vector{Float64}
+  b::Array{Float64}
+  db::Array{Float64}
 
-  function Generator(t, k::Int)
+  function Generator(t, s, k::Int)
     g      = new(t, length(t), k)
+    g.d    = (s..., k)
     g.dt   = diff(t)
     g.sdt  = sqrt(g.dt)
-    g.b    = zeros(k)
-    g.db   = zeros(k)
-    g.y    = zeros(k)
+    g.b    = zeros(g.d)
+    g.db   = zeros(g.d)
+    g.y    = zeros(g.d)
     return g
-  end
-end
-
-@inline function add!(y, dy, k)
-  for i in 1:k
-    @inbounds y[i] += dy[i]
   end
 end
 
@@ -54,33 +51,30 @@ end
   end
 
   # Important to use previous db for process computation not to have bias.
-  add!(g.b, g.db, g.k)
+  add!(g.b, g.db)
   randn!(g.db)
-  for j in 1:g.k
-     @inbounds g.db[j] *= g.sdt[i-1]
-  end
-
-  return next!(process, g, i)
+  cmul!(g.db, g.sdt[i-1])
+  next!(process, g, i)
 end
 
 function cumsim{P <: AProcess}(process::P, t, k::Int=1)
-  gen = Generator(vec(t), k)
-  result = zeros(gen.n, k)
+  s=size(vwrap(initial(process)))
+  gen = Generator(vec(t), s, k)
+  result = zeros(gen.n, s..., k)
   for i in 1:gen.n
     y = next(process, gen, i)
-    for j in 1:k
-      result[i,j] = y[j]
-    end 
+    result[i,:,:] .= y[:,:]
   end
-  result
+  collapse_but_first(result)
 end
 
 function sim{P <: AProcess}(process::P, t, k::Int=1)
-  gen = Generator(t, k)
+  s=size(vwrap(initial(process)))
+  gen = Generator(t, s, k)
   for i in 1:(gen.n-1)
     next(process, gen, i)
   end
-  next(process, gen, gen.n)
+  collapse_but_first(next(process, gen, gen.n))
 end
 
 function Base.rand{P <: AProcess}(process::P, t, k::Int=1)
@@ -91,23 +85,24 @@ function Base.rand{P <: AProcess}(process::P, t, k::Int=1)
   return sim(process, t, k)
 end
 
-"Ito Process: dy = f(t, dt, b, db, y)."
+"Ito Process(f,y0): process satisfying equation dy = f(t, dt, b, db, y)."
 immutable ItoProcess{F} <: AProcess
   f::F
-  y0::Float64
+  y0
 end
 
 function init!{F}(process::ItoProcess{F}, g::Generator)
-  fill!(g.y, process.y0)
+  g.y = repeat(vwrap(initial(process)), outer=(1, g.k))
   g.y
 end
 
 @inline function next!{F}(process::ItoProcess{F}, g::Generator, i)
   dy = process.f(g.t[i-1], g.dt[i-1], g.b, g.db, g.y)
-  add!(g.y, dy, g.k)
+  add!(g.y, dy)
   g.y
 end
 
+initial{F}(process::ItoProcess{F}) = process.y0
 
 # CompositeProcess
 # The resulting process is f(t, y), where y is the value of p
@@ -124,8 +119,11 @@ init!{P, F}(process::CompositeProcess{P,F}, g::Generator) =
   process.f.(g.t[i], g.y)
 end
 
-# A process that is convertible to ItoProcess
+initial{P, F}(process::CompositeProcess{P,F}) = initial(process.p)
 
+size{P, F}(process::CompositeProcess{P,F}) = size(process.p)
+
+"A process that is convertible to ItoProcess"
 abstract AItoProcess <: AProcess
 
 init!{P <: AItoProcess}(process::P, state) = 
@@ -134,10 +132,14 @@ init!{P <: AItoProcess}(process::P, state) =
 next!{P <: AItoProcess}(process::P, state, i) = 
     next!(convert(ItoProcess, process), state, i)
 
+size{P <: AItoProcess}(process::P) = size(convert(ItoProcess, process))
+
+initial{P <: AItoProcess}(process::P) = initial(convert(ItoProcess, process))
+
 # BrownianMotion
 
 immutable BrownianMotion <: AItoProcess
-  y0::Float64
+  y0
 
   BrownianMotion() = new(0.0)
   BrownianMotion(y0) = new(y0)
@@ -146,7 +148,15 @@ end
 convert(::Type{ItoProcess}, bm::BrownianMotion) = 
     ItoProcess((t,dt,b,db,y)->db, bm.y0)
 
-distribution(bm::BrownianMotion, t) = t == 0 ? Constant(bm.y0) : Normal(bm.y0, sqrt(t))
+function distribution(bm::BrownianMotion, t) 
+  if t == 0 
+    Constant(bm.y0)
+  elseif ndims(bm.y0) == 0
+    Normal(bm.y0, sqrt(t))
+  else 
+    MvNormal(eye(length(bm.y0)))
+  end
+end
 
 # BrownianMotionWithDrift
 
@@ -209,5 +219,28 @@ type Constant
 end
 
 Base.rand(c::Constant, k) = Base.rand(c.x, k)
+
+
+function collapse_but_first(A::AbstractArray)
+    s = size(A)
+    dims = tuple(find([d == 1 && i != 1 for (i,d) in enumerate(s)])...)
+    return squeeze(A,dims)
+end
+
+vwrap(x::AbstractArray) = x
+vwrap(x::Number) = [x]
+
+@inline function add!{A}(y::A, dy::A)
+  for i in eachindex(y)
+    @inbounds y[i] += dy[i]
+  end
+end
+
+@inline function cmul!{A}(y::A, dy::Float64)
+  for i in eachindex(y)
+    @inbounds y[i] *= dy
+  end
+end
+
 
 end
