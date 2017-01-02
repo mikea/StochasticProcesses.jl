@@ -154,27 +154,34 @@ function distribution(bm::BrownianMotion, t)
   elseif ndims(bm.y0) == 0
     Normal(bm.y0, sqrt(t))
   else 
-    MvNormal(eye(length(bm.y0)))
+    MvNormal(bm.y0, eye(length(bm.y0)) * t)
   end
 end
 
 # BrownianMotionWithDrift
 
 immutable BrownianMotionWithDrift <: AItoProcess
-  mu::Float64
-  sigma::Float64
-  y0::Float64
+  mu
+  sigma
+  y0
 
   BrownianMotionWithDrift(mu, sigma) = new(mu, sigma, 0.0)
   BrownianMotionWithDrift(mu, sigma, y0) = new(mu, sigma, y0)
 end
 
+
 convert(::Type{ItoProcess}, bm::BrownianMotionWithDrift) = 
-    ItoProcess((t,dt,b,db,y)-> bm.mu * dt + bm.sigma * db, bm.y0)
+    ItoProcess((t,dt,b,db,y)-> (bm.mu * dt) .+ (bm.sigma * db), bm.y0)
 
-distribution(bm::BrownianMotionWithDrift, t) = 
-    t == 0 ? Constant(bm.y0) : Normal(bm.y0 + bm.mu * t, bm.sigma * sqrt(t))
-
+function distribution(bm::BrownianMotionWithDrift, t)
+    if t == 0 
+      Constant(bm.y0) 
+    elseif ndims(bm.y0) == 0
+      Normal(bm.y0 + bm.mu * t, bm.sigma * sqrt(t))
+    else
+      MvNormal(bm.y0 + bm.mu * t, bm.sigma *bm.sigma' * t)
+    end
+end
 
 # Geometric Brownian Motion
 

@@ -2,12 +2,15 @@
 
 [![CircleCI](https://circleci.com/gh/mikea/StochasticProcesses.jl.svg?style=svg&circle-token=fd2d1bde451f113b6bc3de869144990546fd3c96)](https://circleci.com/gh/mikea/StochasticProcesses.jl)
 
-A Julia package for (continuous) stochastic processes. Monte-Carlo simulation and basic facts.
+A Julia package for univariate and multivariate continuous-time stochastic processes. 
+Monte-Carlo simulation and basic facts.
 
 Demo notebooks: 
 * [examples/sde.ipynb](examples/sde.ipynb) - demostration of basic stochastic differential equations properties.
 * [examples/useful_processes.ipynb](examples/useful_processes.ipynb) - demonstration of basic processes and their properties.
 * [examples/black-scholes.ipynb](examples/black-scholes.ipynb) - Black Scholes formula demonstration.
+* [examples/multivariate.ipynb](examples/multivariate.ipynb) - multivariate processes.
+
 
 ## Overview
 
