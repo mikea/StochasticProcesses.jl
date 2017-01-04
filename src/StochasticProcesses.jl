@@ -86,23 +86,23 @@ function Base.rand{P <: AProcess}(process::P, t, k::Int=1)
 end
 
 "Ito Process(f,y0): process satisfying equation dy = f(t, dt, b, db, y)."
-immutable ItoProcess{F} <: AProcess
+immutable ItoProcess{F, Y} <: AProcess
   f::F
-  y0
+  y0::Y
 end
 
-function init!{F}(process::ItoProcess{F}, g::Generator)
+function init!{F,Y}(process::ItoProcess{F,Y}, g::Generator)
   g.y = repeat(vwrap(initial(process)), outer=(1, g.k))
   g.y
 end
 
-@inline function next!{F}(process::ItoProcess{F}, g::Generator, i)
+@inline function next!{F,Y}(process::ItoProcess{F,Y}, g::Generator, i)
   dy = process.f(g.t[i-1], g.dt[i-1], g.b, g.db, g.y)
   add!(g.y, dy)
   g.y
 end
 
-initial{F}(process::ItoProcess{F}) = process.y0
+initial(process::ItoProcess) = process.y0
 
 # CompositeProcess
 # The resulting process is f(t, y), where y is the value of p
@@ -138,12 +138,11 @@ initial{P <: AItoProcess}(process::P) = initial(convert(ItoProcess, process))
 
 # BrownianMotion
 
-immutable BrownianMotion <: AItoProcess
-  y0
-
-  BrownianMotion() = new(0.0)
-  BrownianMotion(y0) = new(y0)
+immutable BrownianMotion{Y} <: AItoProcess
+  y0::Y
 end
+
+BrownianMotion() = BrownianMotion(0.0)
 
 convert(::Type{ItoProcess}, bm::BrownianMotion) = 
     ItoProcess((t,dt,b,db,y)->db, bm.y0)
@@ -160,14 +159,13 @@ end
 
 # BrownianMotionWithDrift
 
-immutable BrownianMotionWithDrift <: AItoProcess
-  mu
-  sigma
-  y0
-
-  BrownianMotionWithDrift(mu, sigma) = new(mu, sigma, 0.0)
-  BrownianMotionWithDrift(mu, sigma, y0) = new(mu, sigma, y0)
+immutable BrownianMotionWithDrift{Y,S} <: AItoProcess
+  mu::Y
+  sigma::S
+  y0::Y
 end
+
+BrownianMotionWithDrift(mu, sigma) = BrownianMotionWithDrift(mu, sigma, 0.0)
 
 
 convert(::Type{ItoProcess}, bm::BrownianMotionWithDrift) = 
