@@ -201,20 +201,20 @@ distribution(bm::GeometricBrownianMotion, t) =
 
 # ItoIntegral
 
-immutable ItoIntegral <: AItoProcess
-  f::Function
+immutable ItoIntegral{F} <: AItoProcess
+  f::F
 end
 
-convert(::Type{ItoProcess}, ii::ItoIntegral) = 
+convert{F}(::Type{ItoProcess}, ii::ItoIntegral{F}) = 
     ItoProcess((t,dt,b,db,y)->ii.f(t).*db, 0.)
 
-immutable SDE <: AItoProcess
-  f::Function
-  g::Function
+immutable SDE{F,G} <: AItoProcess
+  f::F
+  g::G
   y0::Float64
 end
 
-convert(::Type{ItoProcess}, sde::SDE) = 
+convert{F,G}(::Type{ItoProcess}, sde::SDE{F,G}) = 
     ItoProcess((t,dt,b,db,y)->sde.f(t, y).*dt + sde.g(t, y).*db, sde.y0)
 
 
@@ -237,13 +237,13 @@ end
 vwrap(x::AbstractArray) = x
 vwrap(x::Number) = [x]
 
-@inline function add!{A}(y::A, dy::A)
+@inline function add!(y, dy)
   for i in eachindex(y)
     @inbounds y[i] += dy[i]
   end
 end
 
-@inline function cmul!{A}(y::A, dy::Float64)
+@inline function cmul!(y, dy)
   for i in eachindex(y)
     @inbounds y[i] *= dy
   end
