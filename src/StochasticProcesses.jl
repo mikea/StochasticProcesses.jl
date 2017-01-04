@@ -20,7 +20,7 @@ abstract AProcess
 
 type Generator
   # specified
-  t::AbstractArray{Float64, 1}
+  t::Vector{Float64}
   n::Int64
   "number of dimensions."
   k::Int64
@@ -195,7 +195,7 @@ convert(::Type{ItoProcess}, bm::GeometricBrownianMotion) =
     ItoProcess((t,dt,b,db,y)-> (bm.mu * dt) * y + bm.sigma * (y .* db), bm.y0)
 
 distribution(bm::GeometricBrownianMotion, t) = 
-    t == 0 ? Constant(0) :
+    t == 0 ? Constant(bm.y0) :
     LogNormal(log(bm.y0) + t * (bm.mu - bm.sigma^2 / 2), bm.sigma * sqrt(t))
 
 
@@ -225,7 +225,7 @@ type Constant
   x
 end
 
-Base.rand(c::Constant, k) = Base.rand(c.x, k)
+Base.rand(c::Constant, k) = fill(c.x, k)
 
 
 function collapse_but_first(A::AbstractArray)
