@@ -27,11 +27,11 @@ type Generator
 
   # computed
   d::Tuple
-  y::Array{Float64}
+  y::Matrix{Float64}
   dt::Vector{Float64}
   sdt::Vector{Float64}
-  b::Array{Float64}
-  db::Array{Float64}
+  b::Matrix{Float64}
+  db::Matrix{Float64}
 
   function Generator(t, s, k::Int)
     g      = new(t, length(t), k)
