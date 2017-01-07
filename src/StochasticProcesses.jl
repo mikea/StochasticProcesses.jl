@@ -1,5 +1,8 @@
 module StochasticProcesses
 
+include("results.jl")
+
+export SimResult, CumsimResult
 export initial, cumsim, distribution, sim
 export BrownianMotion,
        BrownianMotionWithDrift,
@@ -14,68 +17,10 @@ using Distributions
 
 import Base.convert, Base.size, Base.rand
 
-# Internal stochastic process implementation
-
+# Internal stochastic process interface
 abstract AProcess
 
-type Generator
-  # specified
-  t::Vector{Float64}
-  n::Int64
-  "number of dimensions."
-  k::Int64
-
-  # computed
-  d::Tuple
-  y::Matrix{Float64}
-  dt::Vector{Float64}
-  sdt::Vector{Float64}
-  b::Matrix{Float64}
-  db::Matrix{Float64}
-
-  function Generator(t, s, k::Int)
-    g      = new(t, length(t), k)
-    g.d    = (s..., k)
-    g.dt   = diff(t)
-    g.sdt  = sqrt(g.dt)
-    g.b    = zeros(g.d)
-    g.db   = zeros(g.d)
-    g.y    = zeros(g.d)
-    return g
-  end
-end
-
-@inline function next{P <: AProcess}(process::P, g::Generator, i::Int64)
-  if i == 1
-    return init!(process, g)
-  end
-
-  # Important to use previous db for process computation not to have bias.
-  add!(g.b, g.db)
-  randn!(g.db)
-  cmul!(g.db, g.sdt[i-1])
-  next!(process, g, i)
-end
-
-function cumsim{P <: AProcess}(process::P, t, k::Int=1)
-  s=size(vwrap(initial(process)))
-  gen = Generator(vec(t), s, k)
-  result = zeros(gen.n, s..., k)
-  for i in 1:gen.n
-    y = next(process, gen, i)
-    result[i,:,:] .= y[:,:]
-  end
-  collapse_but_first(result)
-end
-
-function sim{P <: AProcess}(process::P, t, k::Int=1)
-  s=size(vwrap(initial(process)))
-  gen = Generator(t, s, k)
-  for i in 1:(gen.n-1)
-    next(process, gen, i)
-  end
-  collapse_but_first(next(process, gen, gen.n))
-end
+include("solvers.jl")
 
 function Base.rand{P <: AProcess}(process::P, t, k::Int=1)
   # todo: better way to code this?
@@ -224,7 +169,6 @@ type Constant
 end
 
 Base.rand(c::Constant, k) = fill(c.x, k)
-
 
 function collapse_but_first(A::AbstractArray)
     s = size(A)
