@@ -3,7 +3,8 @@ module StochasticProcesses
 include("results.jl")
 
 export SimResult, CumsimResult
-export initial, cumsim, distribution, sim
+export cumsim, sim, initial
+
 export BrownianMotion,
        BrownianMotionWithDrift,
        GeometricBrownianMotion,
@@ -12,6 +13,9 @@ export BrownianMotion,
        SDE,
        CompositeProcess,
        AItoProcess
+
+# Basic processes information
+export distribution, solution
 
 using Distributions
 
@@ -81,85 +85,7 @@ size{P <: AItoProcess}(process::P) = size(convert(ItoProcess, process))
 
 initial{P <: AItoProcess}(process::P) = initial(convert(ItoProcess, process))
 
-# BrownianMotion
-
-immutable BrownianMotion{Y} <: AItoProcess
-  y0::Y
-end
-
-BrownianMotion() = BrownianMotion(0.0)
-
-convert(::Type{ItoProcess}, bm::BrownianMotion) = 
-    ItoProcess((t,dt,b,db,y)->db, bm.y0)
-
-function distribution(bm::BrownianMotion, t) 
-  if t == 0 
-    Constant(bm.y0)
-  elseif ndims(bm.y0) == 0
-    Normal(bm.y0, sqrt(t))
-  else 
-    MvNormal(bm.y0, eye(length(bm.y0)) * t)
-  end
-end
-
-# BrownianMotionWithDrift
-
-immutable BrownianMotionWithDrift{Y,S} <: AItoProcess
-  mu::Y
-  sigma::S
-  y0::Y
-end
-
-BrownianMotionWithDrift(mu, sigma) = BrownianMotionWithDrift(mu, sigma, 0.0)
-
-
-convert(::Type{ItoProcess}, bm::BrownianMotionWithDrift) = 
-    ItoProcess((t,dt,b,db,y)-> (bm.mu * dt) .+ (bm.sigma * db), bm.y0)
-
-function distribution(bm::BrownianMotionWithDrift, t)
-    if t == 0 
-      Constant(bm.y0) 
-    elseif ndims(bm.y0) == 0
-      Normal(bm.y0 + bm.mu * t, bm.sigma * sqrt(t))
-    else
-      MvNormal(bm.y0 + bm.mu * t, bm.sigma *bm.sigma' * t)
-    end
-end
-
-# Geometric Brownian Motion
-
-type GeometricBrownianMotion <: AItoProcess
-    mu::Float64
-    sigma::Float64
-    y0::Float64
-end
-
-convert(::Type{ItoProcess}, bm::GeometricBrownianMotion) = 
-    ItoProcess((t,dt,b,db,y)-> (bm.mu * dt) * y + bm.sigma * (y .* db), bm.y0)
-
-distribution(bm::GeometricBrownianMotion, t) = 
-    t == 0 ? Constant(bm.y0) :
-    LogNormal(log(bm.y0) + t * (bm.mu - bm.sigma^2 / 2), bm.sigma * sqrt(t))
-
-
-# ItoIntegral
-
-immutable ItoIntegral{F} <: AItoProcess
-  f::F
-end
-
-convert{F}(::Type{ItoProcess}, ii::ItoIntegral{F}) = 
-    ItoProcess((t,dt,b,db,y)->ii.f(t).*db, 0.)
-
-immutable SDE{F,G} <: AItoProcess
-  f::F
-  g::G
-  y0::Float64
-end
-
-convert{F,G}(::Type{ItoProcess}, sde::SDE{F,G}) = 
-    ItoProcess((t,dt,b,db,y)->sde.f(t, y).*dt + sde.g(t, y).*db, sde.y0)
-
+include("basic_processes.jl")
 
 # Utilities
 

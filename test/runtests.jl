@@ -14,7 +14,7 @@ let process = GeometricBrownianMotion(1., .1, 100)
   rand(process, t, 10)
 end
 
-let process = ItoIntegral(x->x)
+let process = ItoIntegral((t, b)->t)
   @test size(cumsim(process, t, 3)) == (10, 3)
   @test length(sim(process, t, 3)) == 3
   rand(process, t, 10)
