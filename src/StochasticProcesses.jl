@@ -1,7 +1,5 @@
 module StochasticProcesses
 
-include("results.jl")
-
 export SimResult, CumsimResult
 export cumsim, sim, initial
 
@@ -12,19 +10,21 @@ export BrownianMotion,
        ItoProcess,
        SDE,
        CompositeProcess,
-       AItoProcess
+       AItoProcess,
+       FirstTime
 
 # Basic processes information
 export distribution, solution
-
-using Distributions
-
-import Base.convert, Base.size, Base.rand
 
 # Internal stochastic process interface
 abstract AProcess
 
 include("solvers.jl")
+include("results.jl")
+include("first_time.jl")
+
+using Distributions
+import Base.convert, Base.size, Base.rand
 
 function Base.rand{P <: AProcess}(process::P, t, k::Int=1)
   # todo: better way to code this?
