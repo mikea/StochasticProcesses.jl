@@ -22,8 +22,11 @@ julia> using StochasticProcesses;
 
 ### Basic Processes
 
-`BrownianMotion(y0=0)`, `BrownianMotionWithDrift(mu, sigma, y0)`, `GeometricBrownianMotion(mu, sigma, y0)`.
-
+- `BrownianBridge()`
+- `BrownianMotion(y0=0)`
+- `BrownianMotionWithDrift(mu, sigma, y0)` 
+- `GeometricBrownianMotion(mu, sigma, y0)`
+- `PoissonProcess(lambda)`
 
 ### Ito Processes
 
@@ -90,3 +93,19 @@ julia> rand(BrownianMotionWithDrift(10, 10, 100), linspace(0, 1, 1000), 3)
  108.605
  101.62 
 ```
+
+### First time
+
+First time of predicate turning true:
+
+```julia
+julia> sim(FirstTime(BrownianMotion(), (t, y) -> y > .1), linspace(0, 1, 10000), 5)
+4-element Array{Float64,1}:
+ 0.00420042
+ 0.00760076
+ 0.0235024 
+ 0.0494049 
+``` 
+
+The resulting vector could be less than k-wide when predicate doesn't turn 
+true on the simulated path. 
