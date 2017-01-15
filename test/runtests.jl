@@ -1,5 +1,8 @@
 include("bm_test.jl")
 include("bm_drift_test.jl")
+include("brownian_bridge_test.jl")
+include("first_time_test.jl")
+include("poisson_test.jl")
 
 using Base.Test
 using StochasticProcesses

@@ -1,17 +1,19 @@
 module StochasticProcesses
 
-export SimResult, CumsimResult
 export cumsim, sim, initial
+export SimResult, CumsimResult
 
-export BrownianMotion,
+export AItoProcess,
+       BrownianBridge,
+       BrownianMotion,
        BrownianMotionWithDrift,
+       CompositeProcess,
+       FirstTime,
        GeometricBrownianMotion,
        ItoIntegral,
        ItoProcess,
-       SDE,
-       CompositeProcess,
-       AItoProcess,
-       FirstTime
+       PoissonProcess,
+       SDE
 
 # Basic processes information
 export distribution, solution
@@ -19,9 +21,11 @@ export distribution, solution
 # Internal stochastic process interface
 abstract AProcess
 
-include("solvers.jl")
-include("results.jl")
+include("brownian_bridge.jl")
 include("first_time.jl")
+include("poisson.jl")
+include("results.jl")
+include("solvers.jl")
 
 using Distributions
 import Base.convert, Base.size, Base.rand
