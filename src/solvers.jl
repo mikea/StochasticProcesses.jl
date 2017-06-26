@@ -17,7 +17,7 @@ type Generator
     g      = new(t, length(t), k)
     g.d    = (s..., k)
     g.dt   = diff(t)
-    g.sdt  = sqrt(g.dt)
+    g.sdt  = sqrt.(g.dt)
     g.b    = zeros(g.d)
     g.db   = zeros(g.d)
     g.y    = zeros(g.d)
