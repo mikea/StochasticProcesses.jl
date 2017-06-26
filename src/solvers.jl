@@ -1,4 +1,4 @@
-type Generator
+mutable struct Generator
   # specified
   t::Vector{Float64}
   n::Int64

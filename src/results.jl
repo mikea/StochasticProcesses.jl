@@ -1,13 +1,13 @@
-abstract AResult{T,N} <: AbstractArray{T,N}
+abstract type AResult{T,N} <: AbstractArray{T,N} end
 
-immutable SimResult{T,N} <: AResult{T,N}
+struct SimResult{T,N} <: AResult{T,N}
   sol::Array{T,N}
   
   t # todo: type this
   b::Array{T, 2}
 end
 
-immutable CumsimResult{T,N} <: AResult{T,N}
+struct CumsimResult{T,N} <: AResult{T,N}
   sol::Array{T,N}
   t # todo: type this
 end

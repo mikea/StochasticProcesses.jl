@@ -1,4 +1,4 @@
-immutable FirstTime{Process, Pred}
+struct FirstTime{Process, Pred}
     process::Process
     pred::Pred
 end
