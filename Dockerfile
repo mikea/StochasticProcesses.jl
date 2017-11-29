@@ -1,4 +1,4 @@
-FROM skippa/julia
+FROM juliacomputing/juliapro:latest
 
 COPY . StochasticProcesses.jl/
 WORKDIR StochasticProcesses.jl/
