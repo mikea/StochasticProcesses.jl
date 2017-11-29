@@ -19,7 +19,7 @@ export AItoProcess,
 export distribution, solution
 
 # Internal stochastic process interface
-abstract AProcess
+abstract type AProcess end
 
 include("brownian_bridge.jl")
 include("first_time.jl")
@@ -39,7 +39,7 @@ function Base.rand{P <: AProcess}(process::P, t, k::Int=1)
 end
 
 "Ito Process(f,y0): process satisfying equation dy = f(t, dt, b, db, y)."
-immutable ItoProcess{F, Y} <: AProcess
+struct ItoProcess{F, Y} <: AProcess
   f::F
   y0::Y
 end
@@ -59,7 +59,7 @@ initial(process::ItoProcess) = process.y0
 
 # CompositeProcess
 # The resulting process is f(t, y), where y is the value of p
-immutable CompositeProcess{P <: AProcess, F} <: AProcess
+struct CompositeProcess{P <: AProcess, F} <: AProcess
   p::P
   f::F
 end
@@ -77,7 +77,7 @@ initial{P, F}(process::CompositeProcess{P,F}) = initial(process.p)
 size{P, F}(process::CompositeProcess{P,F}) = size(process.p)
 
 "A process that is convertible to ItoProcess"
-abstract AItoProcess <: AProcess
+abstract type AItoProcess <: AProcess end
 
 init!{P <: AItoProcess}(process::P, state) = 
     init!(convert(ItoProcess, process), state)
@@ -94,7 +94,7 @@ include("basic_processes.jl")
 # Utilities
 
 # Distribution with only one value
-type Constant
+mutable struct Constant
   x
 end
 

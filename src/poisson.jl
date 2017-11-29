@@ -1,8 +1,8 @@
-immutable PoissonProcess
+struct PoissonProcess
     lambda::Float64
 end
 
-type PoissonState
+mutable struct PoissonState
     t::Vector{Float64}
     n::Int64
     k::Int64

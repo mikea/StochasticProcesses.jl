@@ -1,5 +1,5 @@
 "Brownian motion process."
-immutable BrownianMotion{Y} <: AItoProcess
+struct BrownianMotion{Y} <: AItoProcess
   y0::Y
 end
 
@@ -20,7 +20,7 @@ end
 
 # BrownianMotionWithDrift
 
-immutable BrownianMotionWithDrift{Y,S} <: AItoProcess
+struct BrownianMotionWithDrift{Y,S} <: AItoProcess
   mu::Y
   sigma::S
   y0::Y
@@ -47,7 +47,7 @@ solution(p::BrownianMotionWithDrift, t, b) =
 
 # Geometric Brownian Motion
 
-type GeometricBrownianMotion <: AItoProcess
+mutable struct GeometricBrownianMotion <: AItoProcess
     mu::Float64
     sigma::Float64
     y0::Float64
@@ -65,7 +65,7 @@ solution(p::GeometricBrownianMotion, t, b) =
 
 
 "Ito integral of f(t, B)"
-immutable ItoIntegral{F} <: AItoProcess
+struct ItoIntegral{F} <: AItoProcess
   f::F
 end
 
@@ -74,7 +74,7 @@ convert{F}(::Type{ItoProcess}, ii::ItoIntegral{F}) =
 
 "Process corresponding to solutions of stochastic differential equation
  dy = f(t, y) dt + g(t,y) db."
-immutable SDE{F,G} <: AItoProcess
+struct SDE{F,G} <: AItoProcess
   f::F
   g::G
   y0::Float64

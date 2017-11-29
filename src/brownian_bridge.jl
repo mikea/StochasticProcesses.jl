@@ -1,4 +1,4 @@
-immutable BrownianBridge
+struct BrownianBridge
 end
 
 function cumsim(::BrownianBridge, t, k)
